@@ -6,14 +6,19 @@
 var registerPopupListeners = function() {
     var popupView = chrome.extension.getViews({type: "popup"})[0];
 
-    popupView.getElementById("generation-button").addEventListener("click", ProfileHandler.generateNewProfile);
+    // the window was closed before this function could finish - or at least that's what this should mean.
+    if (popupView == null) {
+        return;
+    }
 
-    popupView.getElementById("store-button").addEventListener("click", function () {
+    popupView.document.getElementById("generation-button").addEventListener("click", ProfileHandler.generateNewProfile);
+
+    popupView.document.getElementById("store-button").addEventListener("click", function () {
         //TODO: implement profile storing logic
+        alert()
     });
 
-    popupView.getElementById("load-button").addEventListener("click", function () {
+    popupView.document.getElementById("load-button").addEventListener("click", function () {
         //TODO: implement profile loading logic
     });
 };
-
