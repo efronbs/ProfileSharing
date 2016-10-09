@@ -50,15 +50,10 @@ var CookieManager = (function () {
         returns a JS object representing the trimmed list of cookies. May 
     */
     var getFullTrimmedCookieObject = function (callback) {
-        chrome.cookies.getAllCookieStores(function (cookieStores) {
-            for (var i = 0; i < cookieStores.length; i++) {
-                chrome.cookies.getAll(cookieStores[i], function (cookieArray) {
-                    alert("HERE");
-                    var trimmedCookieArray = trimCookies(cookieArray);
-                    var cookieObject = JSONifyCookies(trimmedCookieArray);
-                    callback(cookieObject);
-                });
-            }
+        chrome.cookies.getAll({}, function (cookieArray) {
+            var trimmedCookieArray = trimCookies(cookieArray);
+            var cookieObject = JSONifyCookies(trimmedCookieArray);
+            callback(cookieObject);
         });
     };
 
