@@ -17,6 +17,7 @@ var CookieManager = (function () {
         cookieJSON.secure = cookie.secure;
         cookieJSON.httpOnly = cookie.httpOnly;
         cookieJSON.sameSite = cookie.sameSite;
+        cookieJSON.session = cookie.session;
         cookieJSON.storeId = cookie.storeId;
 
         if (cookie.expirationDate == null) {
@@ -33,14 +34,12 @@ var CookieManager = (function () {
         I might have just been able to directly stringify the google cookie objects, but since I don't have control over those I decided not to.
     */
     var JSONifyCookies = function (cookieArray) {
-        var currentCookie = cookieArray[0];
+        
 
-        var cookieJSON = getSingleCookieJSON(currentCookie);
-
-        alert(JSON.stringify(cookieJSON));
-        // for (var i = 0; i < cookieArray.length; i++) {
-            
-        // }
+        for (var i = 0; i < cookieArray.length; i++) {
+            var currentCookie = cookieArray[i];
+            var cookieJSON = getSingleCookieJSON(currentCookie);
+        }
     };
 
     //public methods
