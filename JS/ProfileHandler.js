@@ -1,6 +1,7 @@
 var ProfileHandler = (function () {
 
     var profile = {};
+    var reader = new FileReader();
 
     //private methods
     
@@ -32,19 +33,39 @@ var ProfileHandler = (function () {
     //public methods
 
     /*
-        calls all of the full population methods of the relevant handlers. Passes the functions that populate the profile with the relevant information as callbacks
+        calls all of the full population methods of the relevant handlers. 
+        Passes the functions that populate the profile with the relevant information as callbacks.
     */
     var generateNewProfile = function () {
         CookieManager.getFullScrubbedCookieObject(populateProfileCookies);
     };
 
+    /*
+        adds the file 
+    */
     var storeProfile = function () {
         // TODO - implement storing logic
+        var blob = new Blob([JSON.stringify(profile)]);
+        showProfileFile(blob);
     };
+
+    /*
+        recieves the uploaded file and overwrites the profile class with it
+    */
+    var loadProfile = function (profile) {
+        reader.onload = function (e) {
+            var res = reader.result;
+            profile = JSON.parse(res);
+        };
+
+        reader.readAsText(profile); // this will execute the above code - it happens first
+    };
+
 
     return {
         generateNewProfile: generateNewProfile,
-        storeProfile: storeProfile 
+        storeProfile: storeProfile, 
+        loadProfile: loadProfile
     };
 
 })();
