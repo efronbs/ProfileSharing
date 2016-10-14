@@ -1,11 +1,14 @@
 var CookieManager = (function () {
     
     //private methods
-    var trimCookies = function (cookieArray) {
-        //TODO: implement trimming logic
+    var scrubCookies = function (cookieArray) {
+        //TODO: implement scrubbing logic
         return cookieArray;
     };
 
+    /*
+        Gathers all of the data chrome provides on cookies and puts it in a JS object
+    */
     function getSingleCookieJSON (cookie) {
         var cookieJSON = {};
 
@@ -34,30 +37,47 @@ var CookieManager = (function () {
         I might have just been able to directly stringify the google cookie objects, but since I don't have control over those I decided not to.
     */
     var JSONifyCookies = function (cookieArray) {
-        
-
+        var originToCookieDict = {};
+    
         for (var i = 0; i < cookieArray.length; i++) {
             var currentCookie = cookieArray[i];
             var cookieJSON = getSingleCookieJSON(currentCookie);
+            var cookieID = cookieJSON.name + "," + cookieJSON.path;
+
+            if (!(cookieJSON.domain in originToCookieDict)) {   //first cookie for this domain, make a new JS Object for it
+                var newDomain = {};
+                newDomain[cookieID] = cookieJSON;
+                originToCookieDict[cookieJSON.domain] = newDomain;
+            } else {
+                if (cookieID in originToCookieDict[cookieJSON.domain]) { //make sure it doesn't already exist for whatever reason
+                    console.log("CookieID " + cookieID + " already in cookie list");
+                    continue; //Maybe throw a warning?
+                } else {
+                    originToCookieDict[cookieJSON.domain][cookieID] = cookieJSON;
+                }
+            }
         }
+
+        return originToCookieDict;
+
     };
 
     //public methods
 
     /*
-        gets all cookies from the particular browser, and trims them to eliminate all private information
-        returns a JS object representing the trimmed list of cookies. May 
+        gets all cookies from the particular browser, and scrubs them to eliminate all private information
+        returns a JS object representing thescrubbed list of cookies. May 
     */
-    var getFullTrimmedCookieObject = function (callback) {
+    var getFullScrubbedCookieObject = function (callback) {
         chrome.cookies.getAll({}, function (cookieArray) {
-            var trimmedCookieArray = trimCookies(cookieArray);
-            var cookieObject = JSONifyCookies(trimmedCookieArray);
+            var scrubbedCookieArray = scrubCookies(cookieArray);
+            var cookieObject = JSONifyCookies(scrubbedCookieArray);
             callback(cookieObject);
         });
     };
 
     return {
-        getFullTrimmedCookieObject: getFullTrimmedCookieObject
+        getFullScrubbedCookieObject: getFullScrubbedCookieObject
     };
 
 })();
