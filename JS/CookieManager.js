@@ -3,9 +3,20 @@ var CookieManager = (function () {
     //private methods
     var scrubCookies = function (cookieArray) {
         //TODO: implement scrubbing logic
+        var flag = true;
+        for (var i = 0; i < cookieArray.length; i++) {
+            if (cookieArray[i].session === true) {
+                if (flag) {
+                    console.log(cookieArray[i].domain + " , " + cookieArray[i].name + " , " + cookieArray[i].path);
+                    flag = false;
+                }
+                cookieArray.splice(i, 1);
+                i--;
+            }
+        }
+
         return cookieArray;
     };
-
     /*
         Gathers all of the data chrome provides on cookies and puts it in a JS object
     */
