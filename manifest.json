@@ -19,6 +19,8 @@
   },
   "permissions": [
     "cookies",
+    "webRequest",
+    "webRequestBLocking",
     "http://*/*",
     "https://*/*"
   ]
