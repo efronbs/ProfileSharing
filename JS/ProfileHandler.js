@@ -38,6 +38,27 @@ var ProfileHandler = (function () {
         
     };
 
+    var startProfileSynch = function () {
+        WebRequestManager.registerRequestListeners();
+        CookieManager.setBrowserCookies(extractCookiesFromProfile());
+    };
+
+    var extractCookiesFromProfile = function() {
+        var keyset = Object.keys(profile);
+        keyset.splice(keyset.indexOf("ALLDOMAINS"), 1);
+        var cookieArray = [];
+        for (var i = 0; i < keyset.length; i++){
+            var currentKey = keyset[i];
+            var cookieKeyset = Object.keys(profile[currentKey]["Cookies"]);
+            for (var j = 0; j < cookieKeyset.length; j++) {
+                var currentCookieKey = cookieKeyset[i]
+                cookieArray.push(profile[currentKey]["Cookies"][currentCookieKey]);
+            }
+        }
+
+        return cookieArray;
+    }
+
     //public methods
 
     /*

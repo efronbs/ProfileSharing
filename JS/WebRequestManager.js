@@ -1,4 +1,4 @@
-var WebRequestHandler = (function () {
+var WebRequestManager = (function () {
 
     var useragent = "";
 
@@ -27,8 +27,13 @@ var WebRequestHandler = (function () {
         getUserAgent();
     };
 
+    var registerRequestListeners = function () {
+        setupHeaderListeners();
+    };
+
     return {
-        initializedHeaders: initializedHeaders
+        initializedHeaders: initializedHeaders,
+        registerRequestListeners: registerRequestListeners
     };
 
 })();

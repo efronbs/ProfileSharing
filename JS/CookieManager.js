@@ -17,6 +17,7 @@ var CookieManager = (function () {
 
         return cookieArray;
     };
+
     /*
         Gathers all of the data chrome provides on cookies and puts it in a JS object
     */
@@ -87,8 +88,15 @@ var CookieManager = (function () {
         });
     };
 
+    var setBrowserCookies = function(cookieArray) {
+        for (var i = 0; i < cookieArray.length; i++) { 
+            //TODO put cookies into chrome using chrome.cookies
+        }
+    };
+
     return {
-        getFullScrubbedCookieObject: getFullScrubbedCookieObject
+        getFullScrubbedCookieObject: getFullScrubbedCookieObject,
+        setBrowserCookies: setBrowserCookies
     };
 
 })();
