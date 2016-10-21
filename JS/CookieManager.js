@@ -109,10 +109,10 @@ var CookieManager = (function () {
                         console.log(chrome.runtime.lastError);
                         console.log(cookieData);
                     } 
-                    // else {
-                    //     console.log("successfully set cookie: ");
-                    //     console.log(data);
-                    // }
+                    else {
+                        console.log("successfully set cookie: ");
+                        console.log(data);
+                    }
                 };
             })(cookieData));        
         }
