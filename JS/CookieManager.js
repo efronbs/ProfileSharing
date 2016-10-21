@@ -93,20 +93,28 @@ var CookieManager = (function () {
         for (var i = 0; i < cookieArray.length; i++) { 
             //TODO put cookies into chrome using chrome.cookies
             var cookieData = cookieArray[i];
-            if (cookieData["domain"] != "www.forbes.com") { continue; }
-            cookieData["url"] = cookieData["domain"];
+
+            var secure = cookieArray[i].secure ? "s" : "";
+            var parsedDomain = (cookieArray[i].domain.charAt(0) == ".") ? cookieArray[i].domain.substring(0,1) : cookieArray[i].domain;
+            var url = "http" + secure + "://" + parsedDomain + cookieArray[i].path;
+
+            cookieData["url"] = url;
             delete cookieData["session"];
             delete cookieData["hostOnly"];
 
-            console.log(cookieData);
-            chrome.cookies.set(cookieData, function (data) {
-                if (data == null) {
-                    console.log("Error setting cookie " + chrome.runtime.lastError);
-                } else {
-                    console.log(data);
-                }
-            })
-            
+            chrome.cookies.set(cookieData, (function (cookieObj) {
+                return function (data) {
+                    if (data == null) {
+                        console.log("Error setting cookie: ");
+                        console.log(chrome.runtime.lastError);
+                        console.log(cookieData);
+                    } 
+                    // else {
+                    //     console.log("successfully set cookie: ");
+                    //     console.log(data);
+                    // }
+                };
+            })(cookieData));        
         }
 
         // for (var i = 0; i < cookieArray.length; i++) { 
