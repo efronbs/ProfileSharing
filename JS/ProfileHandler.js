@@ -116,7 +116,7 @@ var ProfileHandler = (function () {
         recieves the uploaded file and overwrites the profile class with it
         TODO acutally put loaded data into browser - why wasn't this already implemented
     */
-    var loadProfile = function (profile) {
+    var loadProfile = function (profileFile) {
         reader.onload = function (e) {
             var res = reader.result;
             profile = JSON.parse(res);
@@ -125,7 +125,7 @@ var ProfileHandler = (function () {
             startProfileSynch();
         };
 
-        reader.readAsText(profile); // this will execute the above code - it happens first
+        reader.readAsText(profileFile); // this will execute the above code - it happens first
     };
 
 
