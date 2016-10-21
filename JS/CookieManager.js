@@ -95,7 +95,7 @@ var CookieManager = (function () {
             var cookieData = cookieArray[i];
 
             var secure = cookieArray[i].secure ? "s" : "";
-            var parsedDomain = (cookieArray[i].domain.charAt(0) == ".") ? cookieArray[i].domain.substring(0,1) : cookieArray[i].domain;
+            var parsedDomain = (cookieArray[i].domain.charAt(0) == ".") ? cookieArray[i].domain.substring(1) : cookieArray[i].domain;
             var url = "http" + secure + "://" + parsedDomain + cookieArray[i].path;
 
             cookieData["url"] = url;
@@ -107,14 +107,14 @@ var CookieManager = (function () {
                     if (data == null) {
                         console.log("Error setting cookie: ");
                         console.log(chrome.runtime.lastError);
-                        console.log(cookieData);
+                        console.log(cookieObj);
                     } 
-                    else {
-                        console.log("successfully set cookie: ");
-                        console.log(data);
-                    }
+                    // else {
+                    //     console.log("successfully set cookie: ");
+                    //     console.log(data);
+                    // }
                 };
-            })(cookieData));        
+            }) (cookieData) );        
         }
 
         // for (var i = 0; i < cookieArray.length; i++) { 
