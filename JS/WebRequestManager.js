@@ -20,7 +20,7 @@ var WebRequestManager = (function () {
 
             return { requestHeaders: details.requestHeaders }
         }, filter, extraInfo);
-    }
+    };
 
     //public methods
     var initializedHeaders = function() {

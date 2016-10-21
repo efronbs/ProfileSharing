@@ -2,14 +2,8 @@ var CookieManager = (function () {
     
     //private methods
     var scrubCookies = function (cookieArray) {
-        //TODO: implement scrubbing logic
-        var flag = true;
         for (var i = 0; i < cookieArray.length; i++) {
             if (cookieArray[i].session === true) {
-                if (flag) {
-                    console.log(cookieArray[i].domain + " , " + cookieArray[i].name + " , " + cookieArray[i].path);
-                    flag = false;
-                }
                 cookieArray.splice(i, 1);
                 i--;
             }
@@ -89,9 +83,41 @@ var CookieManager = (function () {
     };
 
     var setBrowserCookies = function(cookieArray) {
+
         for (var i = 0; i < cookieArray.length; i++) { 
             //TODO put cookies into chrome using chrome.cookies
+            var cookieData = cookieArray[i];
+            if (cookieData["domain"] != "www.forbes.com") { continue; }
+            cookieData["url"] = cookieData["domain"];
+            delete cookieData["session"];
+            delete cookieData["hostOnly"];
+
+            console.log(cookieData);
+            chrome.cookies.set(cookieData, function (data) {
+                if (data == null) {
+                    console.log("Error setting cookie " + chrome.runtime.lastError);
+                } else {
+                    console.log(data);
+                }
+            })
+            
         }
+
+        // for (var i = 0; i < cookieArray.length; i++) { 
+        //     //TODO put cookies into chrome using chrome.cookies
+        //     var cookieData = cookieArray[i];
+        //     cookieData["url"] = cookieData["domain"];
+        //     delete cookieData["session"];
+        //     delete cookieData["hostOnly"];
+
+        //     console.log(cookieData);
+        //     chrome.cookies.set(cookieData, function (data) {
+        //         if (data == null) {
+        //             console.log("Error setting cookie " + chrome.runtime.lastError);
+        //         }
+        //     })
+            
+        // }
     };
 
     return {

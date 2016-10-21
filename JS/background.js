@@ -26,8 +26,7 @@ var registerPopupListeners = function() {
     creates a URL to the blob and 
 */
 var showProfileFile = function (blob) {
-    console.log("here");
-
+    
     var popupView = chrome.extension.getViews({type: "popup"})[0];
 
     // the window was closed before this function could finish - or at least that's what this should mean.

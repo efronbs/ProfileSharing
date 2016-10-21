@@ -4,6 +4,14 @@ var ProfileHandler = (function () {
     var reader = new FileReader();
 
     //private methods
+
+    /*
+        This actually starts the process of taking a profile and putting the data it contains into the browser. 
+    */
+    var startProfileSynch = function () {
+        CookieManager.setBrowserCookies(extractCookiesFromProfile());
+        WebRequestManager.registerRequestListeners();
+    };
     
     // should this be public?
     // might make this a more general method, and curry in all of the known parameters through an anonymous function
@@ -38,20 +46,27 @@ var ProfileHandler = (function () {
         
     };
 
-    var startProfileSynch = function () {
-        WebRequestManager.registerRequestListeners();
-        CookieManager.setBrowserCookies(extractCookiesFromProfile());
-    };
 
     var extractCookiesFromProfile = function() {
-        var keyset = Object.keys(profile);
+        var keyset = Object.getOwnPropertyNames(profile);
         keyset.splice(keyset.indexOf("ALLDOMAINS"), 1);
+
         var cookieArray = [];
         for (var i = 0; i < keyset.length; i++){
             var currentKey = keyset[i];
-            var cookieKeyset = Object.keys(profile[currentKey]["Cookies"]);
+
+            // console.log("DOMAIN KEY: " + currentKey);
+
+            var cookieKeyset = Object.getOwnPropertyNames(profile[currentKey]["Cookies"]);
+            
+            // console.log("DOMAIN COOKIE KEYS: " + cookieKeyset);
+
             for (var j = 0; j < cookieKeyset.length; j++) {
-                var currentCookieKey = cookieKeyset[i]
+                var currentCookieKey = cookieKeyset[j]
+
+                // console.log("CURRENT COOKIE KEY: " + currentCookieKey);
+                // console.log("CURRENT COOKIE VALUE: " + profile[currentKey]["Cookies"][currentCookieKey]);
+
                 cookieArray.push(profile[currentKey]["Cookies"][currentCookieKey]);
             }
         }
@@ -78,8 +93,14 @@ var ProfileHandler = (function () {
         Passes the functions that populate the profile with the relevant information as callbacks.
     */
     var generateNewProfile = function () {
-        CookieManager.getFullScrubbedCookieObject(populateProfileCookies);
+        cookiesPopulated = false;
+
         initializeBaseValues();
+        // this is what stack overflow told me to do... it feels super shitty though
+        CookieManager.getFullScrubbedCookieObject( function(cookieObj) {
+            populateProfileCookies(cookieObj);
+            startProfileSynch();
+        });
     };
 
     /*
@@ -99,6 +120,9 @@ var ProfileHandler = (function () {
         reader.onload = function (e) {
             var res = reader.result;
             profile = JSON.parse(res);
+
+            // last thing to happen - starts the profile sync
+            startProfileSynch();
         };
 
         reader.readAsText(profile); // this will execute the above code - it happens first
