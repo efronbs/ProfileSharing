@@ -82,6 +82,12 @@ var CookieManager = (function () {
         });
     };
 
+    /*
+        Sets browse cookies
+
+        TODO write url building logic. Guide in bibliography
+            IMPORTANT : Parse out leading dot if exists
+    */
     var setBrowserCookies = function(cookieArray) {
 
         for (var i = 0; i < cookieArray.length; i++) { 
