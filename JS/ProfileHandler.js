@@ -10,7 +10,7 @@ var ProfileHandler = (function () {
     */
     var startProfileSynch = function () {
         CookieManager.setBrowserCookies(extractCookiesFromProfile());
-        WebRequestManager.registerRequestListeners();
+         WebRequestManager.registerRequestListeners();
     };
     
     // should this be public?
@@ -44,6 +44,8 @@ var ProfileHandler = (function () {
 
         profile["ALLDOMAINS"]["useragent"] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.59 Safari/537.36";
         
+        // for testing purposes only
+        // profile["ALLDOMAINS"]["useragent"] = "fuckyou";
     };
 
 
@@ -82,8 +84,15 @@ var ProfileHandler = (function () {
     var get = function(val) {
         var currentVal = profile;
         for (var i = 0; i < val.length; i++) {
+
+            console.log(currentVal);
+
+             console.log("looking up value at key " + val[i]);
+
             currentVal = currentVal[val[i]];
         }
+
+        console.log(currentVal);
 
         return currentVal;
     }
@@ -132,7 +141,8 @@ var ProfileHandler = (function () {
     return {
         generateNewProfile: generateNewProfile,
         storeProfile: storeProfile, 
-        loadProfile: loadProfile
+        loadProfile: loadProfile,
+        get: get
     };
 
 })();

@@ -9,6 +9,7 @@
     "scripts": [
       "JS/ProfileHandler.js",
       "JS/CookieManager.js",
+      "JS/WebRequestManager.js",
       "JS/background.js"
       ]
   },
