@@ -59,7 +59,8 @@ var CookieManager = (function () {
                     console.log("CookieID " + cookieID + " already in cookie list");
                     continue; //Maybe throw a warning?
                 } else {
-                    originToCookieDict[cookieJSON.domain][cookieID] = cookieJSON;
+                    var noLeadingPeriodDomain = (cookieJSON.domain.charAt(0) == ".") ? cookieJSON.domain.substring(1) : cookieJSON.domain;
+                    originToCookieDict[noLeadingPeriodDomain][cookieID] = cookieJSON;
                 }
             }
         }

@@ -110,7 +110,7 @@ var ProfileHandler = (function () {
     var storeProfile = function () {
         // TODO - implement storing logic
         var blob = new Blob([JSON.stringify(profile)]);
-        showProfileFile(blob);
+        showProfileFile(blobr);
     };
 
     /*

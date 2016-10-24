@@ -18,7 +18,9 @@
     "default_icon": "Resources/Images/icon.png",
     "default_popup": "HTML/BasePage.html"
   },
+  
   "permissions": [
+    "tabs",
     "cookies",
     "webRequest",
     "webRequestBlocking",
