@@ -8,9 +8,9 @@ var ProfileHandler = (function () {
     /*
         This actually starts the process of taking a profile and putting the data it contains into the browser. 
     */
-    var startProfileSynch = function () {
+    var startProfileSync = function () {
         CookieManager.setBrowserCookies(extractCookiesFromProfile());
-         WebRequestManager.registerRequestListeners();
+        WebRequestManager.registerRequestListeners();
     };
     
     // should this be public?
@@ -84,16 +84,8 @@ var ProfileHandler = (function () {
     var get = function(val) {
         var currentVal = profile;
         for (var i = 0; i < val.length; i++) {
-
-            console.log(currentVal);
-
-             console.log("looking up value at key " + val[i]);
-
             currentVal = currentVal[val[i]];
-        }
-
-        console.log(currentVal);
-
+        } 
         return currentVal;
     }
 
@@ -108,7 +100,7 @@ var ProfileHandler = (function () {
         // this is what stack overflow told me to do... it feels super shitty though
         CookieManager.getFullScrubbedCookieObject( function(cookieObj) {
             populateProfileCookies(cookieObj);
-            startProfileSynch();
+            startProfileSync();
         });
     };
 
@@ -131,7 +123,7 @@ var ProfileHandler = (function () {
             profile = JSON.parse(res);
 
             // last thing to happen - starts the profile sync
-            startProfileSynch();
+            startProfileSync();
         };
 
         reader.readAsText(profileFile); // this will execute the above code - it happens first
