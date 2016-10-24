@@ -2,32 +2,35 @@
     This content script will clear the local storage data of the page, and overwrite it with the profile data 
 */
 
- function clearLocalStorageData() {
+/*
+    Clears existing local storage data to prep for profile data. 
+    May need to remove this if it fucks up too many websites
+*/
+function clearLocalStorageData() {
     var storageKeys = Object.getOwnPropertyNames(window.localStorage);
     for (var i = 0; i < storageKeys.length; i++) {
         delete window.localStorage[storageKeys[i]];
     }
 }
 
-function queryAndLoadStorageData() {
-
-}
-
 /*
-    Gets the full domain of this webpage
-*/
-function getFullDomain() {
-    var url = document.location.href;
-    var startLoc = url.indexOf("//");   // should parse off http:// and https:// , leaving subdomain + endpoints
-    url = url.substring(startLoc + 2); 
-    var endLoc = url.indexOf("/");      // should parse off endpoints, leaving only full domain.
-    if (endLoc != -1) {
-        url.substring(0, endLoc);
+    sends the extension a message that this script is ready to accept the local storage data and set it. The response will be a json string in the form
+    {
+        key : value,
+        ... 
+        ...
     }
-}
+*/
+function queryAndLoadStorageData() {
+    
+    chrome.runtime.sendMessage({"script-type" : "persistent-storage", "data" : "ready-for-data"}, function (response) {
+        var responseObj = JSON.parse(response);
+        var responseKeyset = Object.getOwnPropertyNames(responseObj);
 
-function getMainDomain() {
-
+        for (var i = 0; i < responseKeyset.length; i++) {
+            window.localStorage[responseKeyset[i]] = responseObj[responseKeyset[i]];
+        }
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
