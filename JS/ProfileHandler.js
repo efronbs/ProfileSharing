@@ -21,34 +21,60 @@ var ProfileHandler = (function () {
         This function will OVERWRITE the existing cookie bundles in the profile. If you want to insert or remove cookies, please use
         the relevant functions.
     */ 
+    //TODO update this to use chrome.storage API
     var populateProfileCookies = function (cookieSet) {
 
         var profileKeySet = Object.keys(cookieSet);
+
+        if (!("Cookies" in profile)) {
+            profile["Cookies"] = {};
+        }
+
         for (var i = 0; i < profileKeySet.length; i++) {
 
             var domainKey = profileKeySet[i];
             var currentCookieBundle = cookieSet[domainKey];
 
             //if exists, just add it. If not, need to create it
-            if (!(domainKey in profile)) {
-                profile[domainKey] = {}; // create a field for the domain in the profile
-            }  
-            profile[domainKey]["Cookies"] = currentCookieBundle;
+            if (!(domainKey in profile["Cookies"])) {
+                profile["Cookies"][domainKey] = {"keyset" : []}; // create a field for the domain in the profile
+            } 
+
+            var cookieBundleKeyset = Object.keys(currentCookieBundle);
+            // keyset added to profile, now need to set the data in chrome.storage
+            profile["Cookies"][domainKey]["keyset"] = cookieBundleKeyset;
+
+            for (var j = 0; j < cookieBundleKeyset.length; j++) {
+                var newObj = {};
+                newObj[cookieBundleKeyset[j]] = currentCookieBundle[cookieBundleKeyset[j]];
+                console.log(newObj);
+                console.log(JSON.stringify(newObj));
+                chrome.storage.local.set(
+                    JSON.stringify(newObj), function () {
+                        if (chrome.extension.lastError) {
+                            console.log('error occured setting profile cookies: ' + chrome.extension.lastError.message);
+                        }
+                });
+            }
 
         }
     };
 
-    //using my user agent as base - should initialize
+    // using my user agent as base
     var initializeBaseValues = function () {
-        profile["ALLDOMAINS"] = {};
+        profile["SINGLEVALUE"] = [];
 
-        profile["ALLDOMAINS"]["useragent"] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.59 Safari/537.36";
-        
-        // for testing purposes only
-        // profile["ALLDOMAINS"]["useragent"] = "fuckyou";
+        profile["SINGLEVALUE"].push("useragent");
+
+        chrome.local.storage.set({"useragent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.59 Safari/537.36"},
+            function () {
+                if (chrome.extension.lastError) {
+                    console.log('error occured settings useragent: ' + chrome.extension.lastError.message);
+                }
+            });
     };
 
-
+    // TODO update to chrome.storage format
     var extractCookiesFromProfile = function() {
         var keyset = Object.getOwnPropertyNames(profile);
         keyset.splice(keyset.indexOf("ALLDOMAINS"), 1);
@@ -81,6 +107,7 @@ var ProfileHandler = (function () {
     /*
         Takes a list of values. The value retrieved from this path is returned 
     */
+    // TODO update to new chrome.storage format
     var get = function(val) {
         var currentVal = profile;
         for (var i = 0; i < val.length; i++) {
@@ -97,7 +124,7 @@ var ProfileHandler = (function () {
         cookiesPopulated = false;
 
         initializeBaseValues();
-        // this is what stack overflow told me to do... it feels super shitty though
+
         CookieManager.getFullScrubbedCookieObject( function(cookieObj) {
             populateProfileCookies(cookieObj);
             startProfileSync();

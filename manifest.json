@@ -24,6 +24,8 @@
     "cookies",
     "webRequest",
     "webRequestBlocking",
+    "storage",
+    "unlimitedStorage",
     "http://*/*",
     "https://*/*"
   ]

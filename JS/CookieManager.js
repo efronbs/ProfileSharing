@@ -48,7 +48,7 @@ var CookieManager = (function () {
         for (var i = 0; i < cookieArray.length; i++) {
             var currentCookie = cookieArray[i];
             var cookieJSON = getSingleCookieJSON(currentCookie);
-            var cookieID = cookieJSON.name + "," + cookieJSON.path;
+            var cookieID = cookieJSON.domain + "," + cookieJSON.name + "," + cookieJSON.path;
 
             if (!(cookieJSON.domain in originToCookieDict)) {   //first cookie for this domain, make a new JS Object for it
                 var newDomain = {};
@@ -59,8 +59,7 @@ var CookieManager = (function () {
                     console.log("CookieID " + cookieID + " already in cookie list");
                     continue; //Maybe throw a warning?
                 } else {
-                    var noLeadingPeriodDomain = (cookieJSON.domain.charAt(0) == ".") ? cookieJSON.domain.substring(1) : cookieJSON.domain;
-                    originToCookieDict[noLeadingPeriodDomain][cookieID] = cookieJSON;
+                    originToCookieDict[cookieJSON.domain][cookieID] = cookieJSON;
                 }
             }
         }
