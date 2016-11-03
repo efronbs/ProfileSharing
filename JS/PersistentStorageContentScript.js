@@ -2,6 +2,8 @@
     This content script will clear the local storage data of the page, and overwrite it with the profile data 
 */
 
+var gatherDataStorage = false;
+
 /*
     Clears existing local storage data to prep for profile data. 
     May need to remove this if it fucks up too many websites
@@ -24,17 +26,36 @@ function clearLocalStorageData() {
 function queryAndLoadStorageData() {
     
     chrome.runtime.sendMessage({"script-type" : "persistent-storage", "data" : "ready-for-data"}, function (response) {
-        var responseObj = JSON.parse(response);
         var responseKeyset = Object.getOwnPropertyNames(responseObj);
 
         for (var i = 0; i < responseKeyset.length; i++) {
-            window.localStorage[responseKeyset[i]] = responseObj[responseKeyset[i]];
+            window.localStorage[responseKeyset[i]] = response[responseKeyset[i]];
         }
     });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    clearLocalStorageData();
+function gatherAndSendStorageData() {
+    localStorageData = {}
+    for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        localStorageData[key] = localStorage.getItem(key);
+    }
 
-    queryAndLoadStorageData();
+    chrome.runtime.sendMessage({"script-type" : "persistent-storage", "data" : "storage-data", "items" : JSON.stringify(localStorageData)}, function (err) {
+        console.log("error in setting persistent storage " + err);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    chrome.runtime.sendMessage({"script-type" : "persistent-storage", "data" : "gather-storage-data"}, function (response) {
+        gatherDataStorage = response.data;
+    
+        if (!gatherDataStorage) {
+            clearLocalStorageData();
+            queryAndLoadStorageData();
+        } else {
+            gatherAndSendStorageData();
+        }
+    });
 });

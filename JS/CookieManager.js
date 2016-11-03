@@ -13,7 +13,7 @@ var CookieManager = (function () {
     };
 
     /*
-        Gathers all of the data chrome provides on cookies and puts it in a JS object
+        Gathers all of the data chrome `pro`vides on cookies and puts it in a JS object
     */
     function getSingleCookieJSON (cookie) {
         var cookieJSON = {};

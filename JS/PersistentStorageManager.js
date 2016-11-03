@@ -1,11 +1,12 @@
 var PersistentStorageManager = (function () {
 
     var tabIdToUrl= {};
+    var gatherStorageData = false;
 
     //private methods
 
     /*
-        Gets the full domain of this webpage
+        Gets the full domain of this webpage. Parses off the http(s):// and the path of the url.
     */
     function getFullDomain(url) {
         var startLoc = url.indexOf("//");   // should parse off http:// and https:// , leaving subdomain + endpoints
@@ -19,38 +20,24 @@ var PersistentStorageManager = (function () {
     }
 
     /*
-        Parses off subdomains of the webpage's full domain.
-        DON'T USE THIS ON A RAW URL
-        it assumes you have already used getFullDomain to parse off some unnecessary parts
+        Takes a domain (can be parsed from URL with above methods), and retrieves the storage data associate with it.
+        Just a wrapper for the ProfileHandler.get method
     */
-    function getMainDomain(url) {
-        var dotLocations = [];
-
-        for (var i = 0; i < url.length; i++) {
-            if (url[i] == ".") {
-                dotLocations.push(i);
+    function getLocalStorageData(domain, callback) {
+        ProfileHandler.get(["LocalStorage", domain, "keyset"], function (items) { 
+            if (chrome.extension.lastError) {
+                console.log('error getting all cookies' + chrome.extension.lastError.message);
+            } else {
+                callback(items);
             }
-        }
-        
-        // remove all but last website domain and top level domain 
-        // eg: a.b.c.google.com -> google.com
-        // eg: www.google.com -> google.com
-        
-        if (dotLocations.length > 1) {
-            url = url.substring(dotLocations[dotLocations.length - 2]);
-        }
-
-        return url;
-    }
-
-    /*
-        Takes a domain (can be parsed from URL with above methods), and retrieves the storage data associate with it. Just a wrapper for the ProfileHandler.get method
-    */
-    function getLocalStorageData(mainDomain, subdomain) {
-        ProfileHandler.get(["LocalStorage"])
+        });
     }
 
     //public methods
+
+    var setGatherStorageData = function(bool) {
+        gatherStorageData = bool;
+    }
 
     /*
         Registers all of the tab listeners.
@@ -60,15 +47,16 @@ var PersistentStorageManager = (function () {
         /*
             New tab is created. Simply add the tab id to my dict of tabs to urls. No URL will be loaded at this point, so init with empty string
 
-            probably redudant because of onUpdated logic, but still nice to have
+           pretty sure onUpdated makes this redundant. I don't want to accidentally introduce any race conditions where i could feasibly wipe out the url.
         */
-        chrome.tabs.onCreated.addListener( function (tab) {
-            tabIdToUrl[tab.id] = "";
-        });
+
+        // chrome.tabs.onCreated.addListener( function (tab) {
+        //     tabIdToUrl[tab.id] = "";
+        // });
 
         /*
-            Whenever an existing tab is updated. Checks if the URL has changed, and if it has parse out the domain of the URL and see if the domain is different than the stored one.
-            If so, updates the stored domain and injects the storage handler content script.
+            Whenever an existing tab is updated. Checks if the URL has changed, and if it has parse out the domain of the URL and see if the domain is 
+            different than the stored one. If so, updates the stored domain and injects the storage handler content script.
             Also checks if the tab has been closed, then remove that tab from the dict.
         */
         chrome.tabs.onUpdated.addListener( function (tabId, changeInfo, tab) {
@@ -87,7 +75,7 @@ var PersistentStorageManager = (function () {
 
         /*
             remove entry from dict when that tab is closed.
-            Important because if tab is closed, then reopened to same domain, no existing persistent storage data will be overwritten
+            Important because without this, if tab is closed then reopened to same domain, no existing persistent storage data will be overwritten
         */
         chrome.tabs.onRemoved.addListener( function (tabId, removedInfo) {
             var tabIdKeyset = Object.getOwnPropertyNames(tabIdToUrl);
@@ -97,6 +85,10 @@ var PersistentStorageManager = (function () {
             }
         });
 
+        /*
+            How we handle messages from the content script. If it messages us and says it is ready for data to be populated, 
+            we grab the data from local storage and send it back 
+        */
         chrome.runtime.onMessage.addListener( function (message, sender, sendResponse) {
             if (message.script-type != "persistent-storage") {  // this message isn't for us - don't handle it.
                 return;
@@ -104,9 +96,15 @@ var PersistentStorageManager = (function () {
             
             if (message.data == "ready-for-data") {
                 var senderId = sender.tab.id;
-                var mainDomain = getMainDomain(tabIdToUrl[senderId]);
+                getLocalStorageData(tabIdToUrl[senderId], sendResponse);
 
-                profile.get()
+            } else if (message.data == "gather-storage-data") {
+                sendResponse( { "data" : gatherStorageData } );
+
+            } else if (message.data == "storage-data") {
+                localStorageData = JSON.parse(message.items);
+                
+
             }
         });
     }
@@ -114,6 +112,7 @@ var PersistentStorageManager = (function () {
     
 
     return {
+        setGatherStorageData : setGatherStorageData,
         registerPersistentStorageListeners : registerPersistentStorageListeners
     };
 

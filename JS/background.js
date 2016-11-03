@@ -14,7 +14,7 @@ var registerPopupListeners = function() {
 
     popupView.document.getElementById("generation-button").addEventListener("click", ProfileHandler.generateNewProfile);
 
-    popupView.document.getElementById("store-button").addEventListener("click", ProfileHandler.storeProfile);
+    popupView.document.getElementById("store-button").addEventListener("click", ProfileHandler.exportProfile);
 
     popupView.document.getElementById("load-input").addEventListener("change", function () {
         var profileFile = popupView.document.getElementById("load-input").files[0];
