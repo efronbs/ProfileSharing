@@ -137,13 +137,13 @@ var ProfileHandler = (function () {
         This will return the items return from storage, so in the case:
 
         storage:
-            "fuck" : "you"
+            "hello" : "world"
 
-        and you ask for the key "fuck", the array of Objects
+        and you ask for the key "hello", the array of Objects
 
         [
             {
-                fuck : "you" 
+                hello : "world" 
             }
         ]
 
