@@ -11,7 +11,8 @@ var ProfileHandler = (function () {
     var startProfileSync = function () {
         extractCookiesFromProfile(CookieManager.setBrowserCookies);
         WebRequestManager.registerRequestListeners();
-        PersistenStorageManager.setGatherStorageData(false);
+        PersistentStorageManager.setGatherStorageData(false);
+        PersistentStorageManager.registerPersistentStorageListeners();
     };
     
     // should this be public?
@@ -47,11 +48,13 @@ var ProfileHandler = (function () {
             for (var j = 0; j < cookieBundleKeyset.length; j++) {
                 var newObj = {};
                 newObj[cookieBundleKeyset[j]] = currentCookieBundle[cookieBundleKeyset[j]];
-                console.log(newObj);
-                console.log(JSON.stringify(newObj));
+
+                // console.log(newObj);
+                // console.log(JSON.stringify(newObj));
+
                 //TODO: ensure this properly stringifies everything - very possible that it fucks up
                 chrome.storage.local.set(
-                    JSON.stringify(newObj), function () {
+                    newObj, function () {
                         if (chrome.extension.lastError) {
                             console.log('error occured setting profile cookies: ' + chrome.extension.lastError.message);
                         }
@@ -63,14 +66,14 @@ var ProfileHandler = (function () {
 
     // using my user agent as base
     var initializeBaseValues = function () {
-        profile["SINGLEVALUE"] = [];
+        profile["SINGLEVALUE"] = { "keyset" : []};
 
-        profile["SINGLEVALUE"].push("useragent");
+        profile["SINGLEVALUE"]["keyset"].push("useragent");
 
         var spoofedUA = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.85 Safari/537.36";
         // var spoofedUA = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.59 Safari/537.36";
 
-        chrome.storage.local.set({"useragent" :spoofedUA},
+        chrome.storage.local.set({"useragent" : spoofedUA},
             function () {
                 if (chrome.extension.lastError) {
                     console.log('error occured settings useragent: ' + chrome.extension.lastError.message);
@@ -196,7 +199,8 @@ var ProfileHandler = (function () {
 
         CookieManager.getFullScrubbedCookieObject( function(cookieObj) {
             populateProfileCookies(cookieObj);
-            PersistenStorageManager.setGatherStorageData(true);
+            PersistentStorageManager.setGatherStorageData(true);
+            PersistentStorageManager.registerPersistentStorageListeners();
         });
     };
 
@@ -217,7 +221,6 @@ var ProfileHandler = (function () {
 
     /*
         recieves the uploaded file and overwrites the profile class with it
-        TODO acutally put loaded data into browser - why wasn't this already implemented
     */
     var loadProfile = function (profileFile) {
         reader.onload = function (e) {
@@ -238,12 +241,20 @@ var ProfileHandler = (function () {
         reader.readAsText(profileFile); // this will execute the above code - it happens first
     };
 
+    /*
+        debugging features - prints out the internal profile
+    */
+    var showProfile = function () {
+        console.log(profile);
+    }
+
 
     return {
         generateNewProfile: generateNewProfile,
         storeProfile: exportProfile, 
         loadProfile: loadProfile,
-        get: get
+        get: get,
+        showProfile : showProfile
     };
 
 })();

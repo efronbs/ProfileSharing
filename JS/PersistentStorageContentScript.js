@@ -41,21 +41,42 @@ function gatherAndSendStorageData() {
         localStorageData[key] = localStorage.getItem(key);
     }
 
-    chrome.runtime.sendMessage({"script-type" : "persistent-storage", "data" : "storage-data", "items" : JSON.stringify(localStorageData)}, function (err) {
-        console.log("error in setting persistent storage " + err);
+    chrome.runtime.sendMessage({"script-type" : "persistent-storage", "data" : "storage-data", "items" : JSON.stringify(localStorageData)}, function (response) {
+        //console.log("error in setting persistent storage " + err);
     });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-
+function sendStartupMessage() {
     chrome.runtime.sendMessage({"script-type" : "persistent-storage", "data" : "gather-storage-data"}, function (response) {
-        gatherDataStorage = response.data;
+        gatherDataStorage = JSON.parse(response.data);
     
-        if (!gatherDataStorage) {
+        // console.log(response);
+        // console.log("gathering storage data: " + gatherDataStorage);
+
+        if (gatherDataStorage) {
+            gatherAndSendStorageData();
+        } else {
             clearLocalStorageData();
             queryAndLoadStorageData();
-        } else {
-            gatherAndSendStorageData();
         }
     });
-});
+}
+
+/*
+    Execution starts here - I can't guarantee that when I inject the content script whether the page will be loaded or not, so I do a check to see, and if so I run the kick off code, if not 
+    I add an event listener.
+*/
+
+if (document.readyState == "complete") {
+    
+    //console.log("document loaded when script injected");
+    
+    sendStartupMessage();
+} else {
+
+    //console.log("document loaded when script injected");
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        sendStartupMessage();
+    });
+}

@@ -45,6 +45,31 @@ var PersistentStorageManager = (function () {
     var registerPersistentStorageListeners = function() {
 
         /*
+            How we handle messages from the content script. If it messages us and says it is ready for data to be populated, 
+            we grab the data from local storage and send it back 
+        */
+        chrome.runtime.onMessage.addListener( function (message, sender, sendResponse) {
+
+            console.log("message occured.");
+            console.log(message);
+
+            if (message["script-type"] != "persistent-storage") {  // this message isn't for us - don't handle it.
+                return;
+            }
+            
+            if (message.data == "ready-for-data") {
+                var senderId = sender.tab.id;
+                getLocalStorageData(tabIdToUrl[senderId], sendResponse);
+
+            } else if (message.data == "gather-storage-data") {
+                sendResponse( { "data" : gatherStorageData } );
+
+            } else if (message.data == "storage-data") {
+                localStorageData = JSON.parse(message.items);
+            }
+        });
+
+        /*
             New tab is created. Simply add the tab id to my dict of tabs to urls. No URL will be loaded at this point, so init with empty string
 
            pretty sure onUpdated makes this redundant. I don't want to accidentally introduce any race conditions where i could feasibly wipe out the url.
@@ -67,7 +92,7 @@ var PersistentStorageManager = (function () {
 
                  // either changed to a new domain or for whatever reason this tab isn't being tracked. either way, update the tab to domain mapping and inject content script
                 if (!(tab.id in tabIdKeyset) || (tabIdKeyset[tab.id]) !== domainOfNewUrl) {
-                    chrome.tabs.executeScript(tab.id, {file: "PersistentStorageContentScript.js"});
+                    chrome.tabs.executeScript(tab.id, {file: "JS/PersistentStorageContentScript.js"});
                     tabIdToUrl[tab.id] = domainOfNewUrl;
                 }
             }
@@ -85,28 +110,6 @@ var PersistentStorageManager = (function () {
             }
         });
 
-        /*
-            How we handle messages from the content script. If it messages us and says it is ready for data to be populated, 
-            we grab the data from local storage and send it back 
-        */
-        chrome.runtime.onMessage.addListener( function (message, sender, sendResponse) {
-            if (message.script-type != "persistent-storage") {  // this message isn't for us - don't handle it.
-                return;
-            }
-            
-            if (message.data == "ready-for-data") {
-                var senderId = sender.tab.id;
-                getLocalStorageData(tabIdToUrl[senderId], sendResponse);
-
-            } else if (message.data == "gather-storage-data") {
-                sendResponse( { "data" : gatherStorageData } );
-
-            } else if (message.data == "storage-data") {
-                localStorageData = JSON.parse(message.items);
-                
-
-            }
-        });
     }
 
     

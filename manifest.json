@@ -7,6 +7,7 @@
 
   "background": {
     "scripts": [
+      "JS/PersistentStorageManager.js",
       "JS/ProfileHandler.js",
       "JS/CookieManager.js",
       "JS/WebRequestManager.js",
