@@ -89,7 +89,7 @@ var ProfileHandler = (function () {
 
     */
     var extractCookiesFromProfile = function(callback) {
-        var allCookies = Profile["Cookies"];
+        var allCookies = profile["Cookies"];
         var domainSet = Object.getOwnPropertyNames(allCookies);
 
         var allKeys = [];
@@ -155,7 +155,7 @@ var ProfileHandler = (function () {
         var prefix = "";
 
         if (getList[0] === "LocalStorage") {
-            prefix = "localstorage-";
+            prefix = "localstorage,";
         }
 
         var i = 0;
@@ -165,6 +165,7 @@ var ProfileHandler = (function () {
         // just get the last element of the list
         if (!getFromStorage) {
             currentVal = currentVal[getList[i]];
+            callback(currentVal);
         } else {
             chrome.storage.local.get(prefix + currentVal[currentVal.indexOf(getList[i])], (function (callback) {
                 return function (items) {
@@ -176,7 +177,7 @@ var ProfileHandler = (function () {
                 };
             })(callback));
         }
-        callback(currentVal);
+        // callback(currentVal);
     }
 
     /*
@@ -229,7 +230,7 @@ var ProfileHandler = (function () {
         }
 
         // currentVal should now be the keyset
-        var dataKey = "localstorage-" + setList[i];
+        var dataKey = "localstorage," + setList[i];
 
         if (currentVal.indexOf(dataKey) <= -1) { // key not in keyset
             currentVal.push(dataKey);

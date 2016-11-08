@@ -24,7 +24,7 @@ var WebRequestManager = (function () {
     //TODO: implement jquery.when or promises or whatever, so all async methods can be called at once and the the listener setup can be called
     var getUserAgent = function() {
         ProfileHandler.get(["SINGLEVALUE", "keyset", "useragent"], function (items) {
-            useragent = items[0]["useragent"];
+            useragent = items["useragent"];
 
             setupHeaderListeners();
         });
