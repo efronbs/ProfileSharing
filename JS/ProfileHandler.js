@@ -272,12 +272,14 @@ var ProfileHandler = (function () {
     */
     var exportProfile = function () {
 
+        console.log("storing profile");
+
         chrome.storage.local.get(null, function (items) {
             var exportFormat = {}
-            exportForm["TableOfContents"] = profile;
-            exportForm["Storage"] = items;
+            exportFormat["TableOfContents"] = profile;
+            exportFormat["Storage"] = items;
 
-            var blob = new Blob([JSON.stringify(exportForm)]);
+            var blob = new Blob([JSON.stringify(exportFormat)]);
             showProfileFile(blob);
         });
     };
@@ -314,9 +316,9 @@ var ProfileHandler = (function () {
 
 
     return {
-        generateNewProfile: generateNewProfile,
-        storeProfile: exportProfile, 
-        loadProfile: loadProfile,
+        generateNewProfile : generateNewProfile,
+        exportProfile : exportProfile, 
+        loadProfile : loadProfile,
         get : get,
         set : set,
         showProfile : showProfile
