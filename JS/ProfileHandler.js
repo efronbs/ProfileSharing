@@ -152,6 +152,12 @@ var ProfileHandler = (function () {
     var get = function(getList, callback) {
         var currentVal = profile;
         var getFromStorage = (getList.indexOf("keyset") > -1);
+        var prefix = "";
+
+        if (getList[0] === "LocalStorage") {
+            prefix = "localstorage-";
+        }
+
         var i = 0;
         for (i; i < getList.length - 1; i++) {
             currentVal = currentVal[getList[i]];
@@ -160,7 +166,7 @@ var ProfileHandler = (function () {
         if (!getFromStorage) {
             currentVal = currentVal[getList[i]];
         } else {
-            chrome.storage.local.get(currentVal[currentVal.indexOf(getList[i])], (function (callback) {
+            chrome.storage.local.get(prefix + currentVal[currentVal.indexOf(getList[i])], (function (callback) {
                 return function (items) {
                     if (chrome.extension.lastError) {
                         console.log('error getting all cookies' + chrome.extension.lastError.message);
@@ -172,20 +178,73 @@ var ProfileHandler = (function () {
         }
         callback(currentVal);
     }
-    
+
     /*
-        takes local storage data and sends it to the chrome.local.storage
-    */
-    var setProfileLocalStorage = function(items) {
-        var keyset = Object.getOwnPropertyNames(items);
-        for (var i = 0; i < keyset.length; i++ ) {
-            var key = keyset[i];
-            chrome.storage.local.set({ key : JSON.stringify(items[key]) }, function (data) {
-                if (chrome.extension.lastError) {
-                    console.log("error storing local storage to " + chrome.extension.lastError.message);
+        Sets data in the profile. Takes in the full key path, the data to set in local storage, and a callback
+
+        The setList parameter is an array that contains the full "path" of the key, and the key itself. Since every section has a 
+        "keyset" field, which is an array of keys, the last item in setList is the key associated with the data to be stored. If that key
+        is not already in the keyset array it will be added. If it is, nothing will be changed.
+
+        The data should be the data to store. An object consisting of the key from setList associated with the data object passed in will be made,
+        and that will be stored. 
+
+        For example, if you want to store a cookie that is just {"hello" : "world" }, with the key "acookiekey" in local storage, you would call
+        set like so:
+
+
+        set ( ["Cookies", "somedomain.com", "keyset", "acookiekey"], {"hello" : "world" }, function () { ... } )
+
+        The object to be stored that is made internally is:
+
+        {
+            "acookiekey" : 
+                {
+                    "hello" : "world"
                 }
-            });
         }
+
+    */
+    var set = function(setList, data, callback) {
+        var currentVal = profile;
+        var i = 0;
+
+        console.log("setting data");
+        console.log(setList);
+        console.log(data);
+
+        for (i; i < setList.length - 1; i++) {
+            var key = setList[i];
+
+            console.log(currentVal);
+            
+            if (!(key in currentVal)) {
+                if (key == "keyset") {
+                    currentVal[key] = [];
+                } else {
+                    currentVal[key] = {};
+                }
+            }
+            currentVal = currentVal[setList[i]];
+        }
+
+        // currentVal should now be the keyset
+        var dataKey = setList[i];
+
+        if (currentVal.indexOf(dataKey) <= -1) { // key not in keyset
+            currentVal.push("localstorage-" + setList[i]);
+        }
+
+        chrome.storage.local.set({dataKey : data}, (function (callback) {
+            return function (items) {
+                if (chrome.extension.lastError) {
+                    console.log('error getting all cookies' + chrome.extension.lastError.message);
+                } else {
+                    callback(items);
+                }
+            };
+        }) (callback));
+        
     }
 
     /*
@@ -223,6 +282,7 @@ var ProfileHandler = (function () {
         recieves the uploaded file and overwrites the profile class with it
     */
     var loadProfile = function (profileFile) {
+        
         reader.onload = function (e) {
             var res = reader.result;
             var exportForm = JSON.parse(res);
@@ -253,7 +313,8 @@ var ProfileHandler = (function () {
         generateNewProfile: generateNewProfile,
         storeProfile: exportProfile, 
         loadProfile: loadProfile,
-        get: get,
+        get : get,
+        set : set,
         showProfile : showProfile
     };
 

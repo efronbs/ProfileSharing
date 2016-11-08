@@ -33,6 +33,15 @@ var PersistentStorageManager = (function () {
         });
     }
 
+    /*
+        pushes gethered local storage data to the ProfileHandler
+
+        domain is the key for local storage data
+    */
+     var setLocalStorageData = function(domain, data, callback) {
+        ProfileHandler.set(["LocalStorage", "keyset", domain], data, callback);
+    }
+
     //public methods
 
     var setGatherStorageData = function(bool) {
@@ -56,9 +65,10 @@ var PersistentStorageManager = (function () {
             if (message["script-type"] != "persistent-storage") {  // this message isn't for us - don't handle it.
                 return;
             }
+
+            var senderId = sender.tab.id;
             
             if (message.data == "ready-for-data") {
-                var senderId = sender.tab.id;
                 getLocalStorageData(tabIdToUrl[senderId], sendResponse);
 
             } else if (message.data == "gather-storage-data") {
@@ -66,6 +76,7 @@ var PersistentStorageManager = (function () {
 
             } else if (message.data == "storage-data") {
                 localStorageData = JSON.parse(message.items);
+                setLocalStorageData(tabIdToUrl[senderId], localStorageData, function (items) {});
             }
         });
 
