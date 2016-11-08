@@ -12,8 +12,8 @@ var PersistentStorageManager = (function () {
         var startLoc = url.indexOf("//");   // should parse off http:// and https:// , leaving subdomain + endpoints
         url = url.substring(startLoc + 2); 
         var endLoc = url.indexOf("/");      // should parse off endpoints, leaving only full domain.
-        if (endLoc != -1) {
-            url.substring(0, endLoc);
+        if (endLoc > -1) {
+            url = url.substring(0, endLoc);
         }
 
         return url;
@@ -39,7 +39,7 @@ var PersistentStorageManager = (function () {
         domain is the key for local storage data
     */
      var setLocalStorageData = function(domain, data, callback) {
-        ProfileHandler.set(["LocalStorage", "keyset", domain], data, callback);
+        ProfileHandler.set(["LocalStorage", "keyset", getFullDomain(domain)], data, callback);
     }
 
     //public methods

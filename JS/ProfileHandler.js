@@ -209,14 +209,14 @@ var ProfileHandler = (function () {
         var currentVal = profile;
         var i = 0;
 
-        console.log("setting data");
-        console.log(setList);
-        console.log(data);
+        // console.log("setting data");
+        // console.log(setList);
+        // console.log(data);
 
         for (i; i < setList.length - 1; i++) {
             var key = setList[i];
 
-            console.log(currentVal);
+            // console.log(currentVal);
             
             if (!(key in currentVal)) {
                 if (key == "keyset") {
@@ -229,17 +229,21 @@ var ProfileHandler = (function () {
         }
 
         // currentVal should now be the keyset
-        var dataKey = setList[i];
+        var dataKey = "localstorage-" + setList[i];
 
         if (currentVal.indexOf(dataKey) <= -1) { // key not in keyset
-            currentVal.push("localstorage-" + setList[i]);
+            currentVal.push(dataKey);
         }
 
-        chrome.storage.local.set({dataKey : data}, (function (callback) {
+        dataToSet = {};
+        dataToSet[dataKey] = data;
+
+        chrome.storage.local.set(dataToSet, (function (callback) {
             return function (items) {
                 if (chrome.extension.lastError) {
-                    console.log('error getting all cookies' + chrome.extension.lastError.message);
+                    console.log('error setting local storage data' + chrome.extension.lastError.message);
                 } else {
+                    console.log("set local storage items");
                     callback(items);
                 }
             };
