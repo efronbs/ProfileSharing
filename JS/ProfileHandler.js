@@ -70,8 +70,7 @@ var ProfileHandler = (function () {
 
         profile["SINGLEVALUE"]["keyset"].push("useragent");
 
-        var spoofedUA = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.85 Safari/537.36";
-        // var spoofedUA = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.59 Safari/537.36";
+        var spoofedUA = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.59 Safari/537.36";
 
         chrome.storage.local.set({"useragent" : spoofedUA},
             function () {
